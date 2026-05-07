@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>18 Hole Putting</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+:root {
+  --bg: #f0ede6;
+  --paper: #faf8f4;
+  --ink: #1c1c1a;
+  --ink-mid: #5a5850;
+  --ink-light: #a09c94;
+  --rule: #e0dbd0;
+  --green: #1e3d2a;
+  --green-mid: #2d5c3f;
+  --green-accent: #4a8c5c;
+  --gold: #b8922a;
+  --red-bg: rgba(160,40,40,0.09);
+  --red-txt: #902020;
+  --blue-bg: rgba(30,80,160,0.09);
+  --blue-txt: #1a4a8a;
+  --even-row: rgba(0,0,0,0.025);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: var(--bg);
+  font-family: 'IBM Plex Sans', sans-serif;
+  color: var(--ink);
+  min-height: 100vh;
+  padding-bottom: 40px;
+}
+
+.header {
+  background: var(--green);
+  padding: 14px 16px 12px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+
+.header h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.85rem;
+  letter-spacing: 0.1em;
+  color: #f5f0e8;
+  line-height: 1;
+}
+
+.header-sub {
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  margin-top: 2px;
+}
+
+.toolbar {
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.add-btn {
+  background: var(--green-mid);
+  color: #f5f0e8;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+.add-btn:active { opacity: 0.75; }
+
+.round-note {
+  font-size: 0.68rem;
+  color: var(--ink-light);
+}
+
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 4px 16px 10px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.63rem;
+  color: var(--ink-light);
+}
+.ld { width: 9px; height: 9px; border-radius: 2px; }
+.ld-1 { background: var(--blue-bg); border: 1px solid var(--blue-txt); }
+.ld-2 { background: rgba(40,120,60,0.12); border: 1px solid var(--green-mid); }
+.ld-3 { background: rgba(184,146,42,0.18); border: 1px solid var(--gold); }
+.ld-4 { background: var(--red-bg); border: 1px solid var(--red-txt); }
+
+.scroll-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 14px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  background: var(--paper);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.09);
+}
+
+/* THEAD */
+thead tr { background: var(--green-mid); }
+
+thead th {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.8);
+  padding: 6px 3px;
+  text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.1);
+  white-space: nowrap;
+}
+
+thead th.hole-th {
+  width: 30px;
+  background: rgba(0,0,0,0.18);
+  color: rgba(255,255,255,0.4);
+  font-size: 0.6rem;
+}
+
+.date-input {
+  background: rgba(255,255,255,0.13);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 5px;
+  color: #fff;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.66rem;
+  padding: 4px 3px;
+  width: 72px;
+  text-align: center;
+  display: block;
+  margin: 0 auto;
+}
+.date-input:focus { outline: none; border-color: var(--gold); }
+.date-input::placeholder { color: rgba(255,255,255,0.3); }
+
+.del-btn {
+  display: block;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.25);
+  font-size: 0.75rem;
+  cursor: pointer;
+  margin: 0 auto 3px;
+  padding: 1px 4px;
+  line-height: 1;
+}
+.del-btn:active { color: #e08080; }
+
+/* TBODY */
+tbody tr { border-bottom: 1px solid var(--rule); }
+tbody tr:nth-child(even) { background: var(--even-row); }
+
+td.hole-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--ink-light);
+  text-align: center;
+  padding: 0;
+  width: 30px;
+  background: rgba(0,0,0,0.025);
+  border-right: 2px solid var(--rule);
+  user-select: none;
+}
+
+td.score-cell {
+  padding: 2px 3px;
+  text-align: center;
+  border-right: 1px solid var(--rule);
+  min-width: 78px;
+}
+td.score-cell:last-child { border-right: none; }
+
+.score-input {
+  width: 100%;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--ink);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-align: center;
+  padding: 7px 2px;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color 0.12s, background 0.12s;
+}
+.score-input:focus { outline: none; border-color: var(--gold); background: rgba(184,146,42,0.06); }
+.score-input::placeholder { color: var(--rule); }
+
+.score-input[data-v="1"] { background: var(--blue-bg); color: var(--blue-txt); font-weight: 600; }
+.score-input[data-v="2"] { background: rgba(40,120,60,0.07); color: var(--green-mid); }
+.score-input[data-v="3"] { background: rgba(184,146,42,0.1); color: var(--gold); }
+.score-input[data-v="4"] { background: var(--red-bg); color: var(--red-txt); }
+
+/* nine divider */
+tr.nine-div td {
+  background: rgba(45,92,63,0.06) !important;
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--green-mid);
+  padding: 3px 8px !important;
+  border-bottom: 1px solid rgba(45,92,63,0.15);
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+
+/* TFOOT */
+tfoot tr { background: var(--green); border-top: 2px solid var(--green-accent); }
+
+tfoot td {
+  padding: 9px 4px;
+  text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.08);
+}
+tfoot td:first-child {
+  font-size: 0.58rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+
+.total-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #f5f0e8;
+  display: block;
+  line-height: 1;
+}
+
+.total-par {
+  font-size: 0.6rem;
+  font-family: 'IBM Plex Mono', monospace;
+  display: block;
+  margin-top: 2px;
+}
+.total-par.under { color: #7ec8a0; }
+.total-par.over  { color: #e08080; }
+.total-par.even  { color: rgba(255,255,255,0.35); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>18 Hole Putting</h1>
+  <div class="header-sub">Practice Scorecard</div>
+</div>
+
+<div class="toolbar">
+  <button class="add-btn" onclick="addRound()">＋ Add Round</button>
+  <span class="round-note" id="round-note"></span>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="ld ld-1"></div>1 putt</div>
+  <div class="legend-item"><div class="ld ld-2"></div>2 putts</div>
+  <div class="legend-item"><div class="ld ld-3"></div>3 putts</div>
+  <div class="legend-item"><div class="ld ld-4"></div>4+ putts</div>
+</div>
+
+<div class="scroll-wrap">
+  <table id="scorecard">
+    <thead id="t-head"></thead>
+    <tbody id="t-body"></tbody>
+    <tfoot id="t-foot"></tfoot>
+  </table>
+</div>
+
+<script>
+const KEY = 'putting_v4';
+const MAX = 8;
+
+function load() {
+  try { return JSON.parse(localStorage.getItem(KEY)) || { rounds: [] }; }
+  catch { return { rounds: [] }; }
+}
+function save() { localStorage.setItem(KEY, JSON.stringify(state)); }
+
+let state = load();
+
+// Seed from screenshot if empty
+if (!state.rounds.length) {
+  state.rounds = [
+    { date: '4/28/2026', scores: [3,2,3,2,3,1,2,3,2,4,2,2,2,3,2,2,1,2] },
+    { date: '5/6/2026',  scores: [2,2,4,2,2,2,2,2,3,3,3,2,2,3,3,2,2,3] }
+  ];
+  save();
+}
+
+function render() {
+  renderHead();
+  renderBody();
+  renderFoot();
+  document.getElementById('round-note').textContent =
+    state.rounds.length >= MAX
+      ? `Max ${MAX} rounds`
+      : `${state.rounds.length} round${state.rounds.length !== 1 ? 's' : ''}`;
+}
+
+function renderHead() {
+  let h = '<tr><th class="hole-th">#</th>';
+  state.rounds.forEach((r, ri) => {
+    h += `<th style="min-width:82px">
+      <button class="del-btn" onclick="delRound(${ri})">✕</button>
+      <input class="date-input" type="text" placeholder="mm/dd/yy"
+        value="${r.date}"
+        onchange="state.rounds[${ri}].date=this.value;save();"
+        maxlength="12">
+    </th>`;
+  });
+  h += '</tr>';
+  document.getElementById('t-head').innerHTML = h;
+}
+
+function renderBody() {
+  let b = '';
+  for (let h = 1; h <= 18; h++) {
+    if (h === 10) {
+      b += `<tr class="nine-div"><td colspan="${state.rounds.length + 1}">Back Nine</td></tr>`;
+    }
+    b += `<tr><td class="hole-num">${h}</td>`;
+    state.rounds.forEach((r, ri) => {
+      const v = r.scores[h - 1] || '';
+      const dv = v >= 1 ? Math.min(v, 4) : '';
+      b += `<td class="score-cell">
+        <input class="score-input" type="number" min="1" max="9"
+          inputmode="numeric" pattern="[0-9]*"
+          placeholder="·"
+          value="${v || ''}"
+          data-v="${dv}"
+          data-r="${ri}" data-h="${h - 1}"
+          oninput="onScore(this)">
+      </td>`;
+    });
+    b += '</tr>';
+  }
+  document.getElementById('t-body').innerHTML = b;
+}
+
+function renderFoot() {
+  let f = '<tr><td>Total</td>';
+  state.rounds.forEach(r => {
+    const played = r.scores.filter(v => v > 0);
+    const total  = played.reduce((a, b) => a + b, 0);
+    const diff   = total - played.length * 2;
+    let pc = 'even', ps = played.length ? 'E' : '';
+    if (played.length && diff !== 0) {
+      pc = diff < 0 ? 'under' : 'over';
+      ps = diff < 0 ? String(diff) : '+' + diff;
+    }
+    f += `<td>
+      <span class="total-val">${played.length ? total : '—'}</span>
+      <span class="total-par ${pc}">${ps}</span>
+    </td>`;
+  });
+  f += '</tr>';
+  document.getElementById('t-foot').innerHTML = f;
+}
+
+function onScore(input) {
+  const ri = +input.dataset.r;
+  const hi = +input.dataset.h;
+  const v  = parseInt(input.value);
+  if (!isNaN(v) && v >= 1) {
+    state.rounds[ri].scores[hi] = v;
+    input.dataset.v = Math.min(v, 4);
+  } else {
+    state.rounds[ri].scores[hi] = 0;
+    input.dataset.v = '';
+    input.value = '';
+  }
+  save();
+  renderFoot();
+}
+
+function addRound() {
+  if (state.rounds.length >= MAX) return;
+  state.rounds.push({ date: '', scores: new Array(18).fill(0) });
+  save();
+  render();
+  setTimeout(() => {
+    const sw = document.querySelector('.scroll-wrap');
+    sw.scrollLeft = sw.scrollWidth;
+  }, 60);
+}
+
+function delRound(ri) {
+  if (!confirm(`Remove Round ${ri + 1}?`)) return;
+  state.rounds.splice(ri, 1);
+  save();
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
